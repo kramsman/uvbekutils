@@ -1,5 +1,6 @@
 """  init.py """
 
+from .select_file import select_file
 from .bek_funcs import is_number
 from .bek_funcs import exit_yes
 from .bek_funcs import clean_field
