@@ -12,8 +12,8 @@ include = ["uvbekutils*"]
 # Tells uv to look in the root directory (.) for the "uvbekutils" folder
 module-root = "."
 
-[tool.uv.sources]
-bekutils = { git = "https://github.com/kramsman/bekutils.git" }
+#[tool.uv.sources]
+#bekutils = { git = "https://github.com/kramsman/bekutils.git" }
 
 
 [project]
