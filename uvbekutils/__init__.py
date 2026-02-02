@@ -1,5 +1,7 @@
 """  init.py """
 
+from .pyautobek import alert
+from .pyautobek import confirm
 from .select_file import select_file
 from .bek_funcs import scroll_box
 from .bek_funcs import is_number
