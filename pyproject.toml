@@ -12,18 +12,23 @@ include = ["uvbekutils*"]
 # Tells uv to look in the root directory (.) for the "uvbekutils" folder
 module-root = "."
 
+[tool.uv.sources]
+bekutils = { git = "https://github.com/kramsman/bekutils.git" }
+
 
 [project]
 name = "uvbekutils"
 version = "0.1.0"
-description = "utility tools using uv to manage the environment"
+description = "utility tools using uv to manage the environment now with uv and no tkinter"
 requires-python = ">=3.12"
 dependencies = [
+    #    "bekutils",
+    "pyautogui",
     "loguru>=0.7.3",
     "numpy>=2.4.1",
     "openpyxl>=3.1.5",
     "pandas>=3.0.0",
-    "pymsgbox>=2.0.1",
+    #    "pymsgbox>=2.0.1",
     "pyside6>=6.10.1",
-    "pysimplegui>=5.0.8.3",
+    #    "pysimplegui>=5.0.8.3",
 ]
