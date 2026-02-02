@@ -120,7 +120,6 @@ def bek_write_excel(df, sheet_name, startrow, cell_infos = None,):
     from uvbekutils import autosize_xls_cols
     from uvbekutils import exe_file
 
-    # op_file = f"{Path(__file__).stem}.xlsx"
     op_file = exe_file().with_suffix(".xlsx")
 
     writer = pd.ExcelWriter(op_file)
@@ -168,11 +167,6 @@ def exe_path():
     """ return the path of location where exe is running """
 
     from uvbekutils import exe_file
-    # from pathlib import Path
-    #
-    # import __main__
-    # import os
-
     exe_path = exe_file().parents[0]
 
     return exe_path
