@@ -1,11 +1,12 @@
 
-def list_pick(lst, title='', msg='', pre_select=False):
+def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
     """Select items from a list using checkboxes or radio buttons.
 
     Args:
         lst: list of text items to select from
         title: title displayed at the top of the dialog
         msg: message displayed below the title
+        select_mode: 'single' for radio buttons (one choice), 'multiple' for checkboxes (many choices)
         pre_select: if True, the first item starts selected; if False, nothing is selected
 
     Returns:
@@ -30,7 +31,7 @@ def list_pick(lst, title='', msg='', pre_select=False):
             self.setWindowTitle(title)
             self.setMinimumWidth(350)
             self.result_value = None
-            self.is_multiple = False
+            self.is_multiple = select_mode == 'multiple'
             self.item_widgets = []
             self.radio_group = None
 
@@ -42,14 +43,11 @@ def list_pick(lst, title='', msg='', pre_select=False):
                 msg_label.setStyleSheet("font-size: 14px;")
                 main_layout.addWidget(msg_label)
 
-            # mode toggle
-            self.mode_toggle = QCheckBox("Toggle to allow multiple values ")
-            self.mode_toggle.setChecked(False)
-            self.mode_toggle.toggled.connect(self.on_mode_toggled)
-            main_layout.addWidget(self.mode_toggle)
-
             # mode status label
-            self.mode_status = QLabel("- Currently only a single value allowed")
+            if self.is_multiple:
+                self.mode_status = QLabel("- Currently multiple values allowed")
+            else:
+                self.mode_status = QLabel("- Currently only a single value allowed")
             main_layout.addWidget(self.mode_status)
 
             # scroll area for list items
@@ -70,8 +68,11 @@ def list_pick(lst, title='', msg='', pre_select=False):
             btn_layout.addWidget(cancel_btn)
             main_layout.addLayout(btn_layout)
 
-            # build the list in single (radio) mode
-            self.build_radio_list()
+            # build the list based on select_mode
+            if self.is_multiple:
+                self.build_checkbox_list()
+            else:
+                self.build_radio_list()
 
         def build_radio_list(self):
             self.clear_list()
@@ -111,29 +112,6 @@ def list_pick(lst, title='', msg='', pre_select=False):
                 if item.widget():
                     item.widget().deleteLater()
 
-        def get_selected_indices(self):
-            selected = set()
-            for i, w in enumerate(self.item_widgets):
-                if w.isChecked():
-                    selected.add(i)
-            return selected
-
-        def on_mode_toggled(self, checked):
-            selected = self.get_selected_indices()
-            self.is_multiple = checked
-            if checked:
-                self.mode_toggle.setText("Toggle to allow only a single value ")
-                self.mode_status.setText("- Currently multiple values allowed")
-                self.build_checkbox_list(selected)
-            else:
-                self.mode_toggle.setText("Toggle to allow multiple values ")
-                self.mode_status.setText("- Currently only a single value allowed")
-                # keep only first selected when switching to single
-                first_selected = min(selected) if selected else None
-                self.build_radio_list()
-                if first_selected is not None:
-                    self.item_widgets[first_selected].setChecked(True)
-
         def on_ok(self):
             selected = [lst[i] for i in range(len(lst)) if self.item_widgets[i].isChecked()]
             self.result_value = selected
@@ -151,7 +129,9 @@ def list_pick(lst, title='', msg='', pre_select=False):
 if __name__ == '__main__':
 
     ll = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5']
-    selected = list_pick(ll, title='Pick Items', msg='Choose your items', pre_select=False)
+    selected = list_pick(ll, title='Pick Gift', msg='Choose the gift you want to seend to people',
+                         select_mode='single', pre_select=False)
     print(f"{selected=}")
-    selected = list_pick(ll, title='Pick Items', msg='Pre-Selected Example', pre_select=True)
+    selected = list_pick(ll, title='Pick Gifts', msg='Choose the gifts you wish to buy',
+                         select_mode='multiple', pre_select=True)
     print(f"{selected=}")
