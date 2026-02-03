@@ -66,6 +66,10 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False, all
             ok_btn.clicked.connect(self.on_ok)
             cancel_btn.clicked.connect(self.on_cancel)
             btn_layout.addWidget(ok_btn)
+            if self.is_multiple:
+                select_all_btn = QPushButton("Select All")
+                select_all_btn.clicked.connect(self.on_select_all)
+                btn_layout.addWidget(select_all_btn)
             if allow_none:
                 clear_btn = QPushButton("Clear All")
                 clear_btn.clicked.connect(self.on_clear)
@@ -124,6 +128,10 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False, all
                 return
             self.result_value = selected if selected else ['']
             self.accept()
+
+        def on_select_all(self):
+            for w in self.item_widgets:
+                w.setChecked(True)
 
         def on_clear(self):
             if self.radio_group:
