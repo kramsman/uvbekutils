@@ -1,5 +1,5 @@
 
-def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
+def list_pick(lst, title='', msg='', select_mode='single', pre_select=False, allow_none=False):
     """Select items from a list using checkboxes or radio buttons.
 
     Args:
@@ -8,16 +8,17 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
         msg: message displayed below the title
         select_mode: 'single' for radio buttons (one choice), 'multiple' for checkboxes (many choices)
         pre_select: if True, the first item starts selected; if False, nothing is selected
+        allow_none: if False, user must pick at least one value or cancel; if True, OK with no selection returns ['']
 
     Returns:
-        list of selected values (empty list if OK with no selections), or None if cancelled
+        list of selected values, [''] if OK with no selections (allow_none=True), or None if cancelled
     """
 
     import sys
     from PySide6.QtWidgets import (
         QApplication, QDialog, QVBoxLayout, QHBoxLayout,
         QCheckBox, QRadioButton, QButtonGroup, QPushButton,
-        QLabel, QScrollArea, QWidget,
+        QLabel, QScrollArea, QWidget, QMessageBox,
     )
     from PySide6.QtCore import Qt
 
@@ -65,6 +66,10 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
             ok_btn.clicked.connect(self.on_ok)
             cancel_btn.clicked.connect(self.on_cancel)
             btn_layout.addWidget(ok_btn)
+            if allow_none:
+                clear_btn = QPushButton("Clear All")
+                clear_btn.clicked.connect(self.on_clear)
+                btn_layout.addWidget(clear_btn)
             btn_layout.addWidget(cancel_btn)
             main_layout.addLayout(btn_layout)
 
@@ -114,8 +119,19 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
 
         def on_ok(self):
             selected = [lst[i] for i in range(len(lst)) if self.item_widgets[i].isChecked()]
-            self.result_value = selected
+            if not selected and not allow_none:
+                QMessageBox.warning(self, title, "Please select at least one value.")
+                return
+            self.result_value = selected if selected else ['']
             self.accept()
+
+        def on_clear(self):
+            if self.radio_group:
+                self.radio_group.setExclusive(False)
+            for w in self.item_widgets:
+                w.setChecked(False)
+            if self.radio_group:
+                self.radio_group.setExclusive(True)
 
         def on_cancel(self):
             self.result_value = None
@@ -129,9 +145,21 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
 if __name__ == '__main__':
 
     ll = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5']
+
+    # return non list if signle mode
     selected = list_pick(ll, title='Pick Gift', msg='Choose the gift you want to seend to people',
-                         select_mode='single', pre_select=False)
+                         select_mode='single', pre_select=False, )[0]
     print(f"{selected=}")
+
+
+    selected = list_pick(ll, title='Pick Gift', msg='Choose the gift you want to seend to people',
+                         select_mode='single', pre_select=False, allow_none=True)
+    print(f"{selected=}")
+
     selected = list_pick(ll, title='Pick Gifts', msg='Choose the gifts you wish to buy',
                          select_mode='multiple', pre_select=True)
+    print(f"{selected=}")
+
+    selected = list_pick(ll, title='Pick Gifts', msg='Choose the gifts you wish to buy',
+                         select_mode='multiple', pre_select=True, allow_none=True)
     print(f"{selected=}")
