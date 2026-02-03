@@ -231,7 +231,7 @@ def setup_loguru(log_level_std='INFO', log_level_log='INFO', log_path=None, log_
 def exit_yes_no(msg, title=None, display_exiting=False):
     """ displays msg and prompts whether to continue or not"""
 
-    import pyautobek
+    from uvbekutils import pyautobek
     from loguru import logger
 
     choice = pyautobek.confirm("Do you want to continue running or set {USE} based on the longest substitutions? Check the log for values.\n\nContinue?",
@@ -246,7 +246,7 @@ def exit_yes_no(msg, title=None, display_exiting=False):
 def exit_yes(msg: str, title: str = None, *, errmsg: str = None, raise_err: bool=False) -> None:
     """ exits program after giving user a popup window and raising an error. """
 
-    import pyautobek
+    from uvbekutils import pyautobek
     from loguru import logger
 
     if not errmsg:
@@ -358,7 +358,7 @@ def bad_path_create(path, msg=None):
     """ checks for directory existence and creates if not found"""
 
     import os
-    import pyautobek
+    from uvbekutils import pyautobek
     from loguru import logger
 
     if msg is None:
