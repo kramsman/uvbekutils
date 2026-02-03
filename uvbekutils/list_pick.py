@@ -45,9 +45,9 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
 
             # mode status label
             if self.is_multiple:
-                self.mode_status = QLabel("- Currently multiple values allowed")
+                self.mode_status = QLabel("Multiple values allowed")
             else:
-                self.mode_status = QLabel("- Currently only a single value allowed")
+                self.mode_status = QLabel("Only a single value allowed")
             main_layout.addWidget(self.mode_status)
 
             # scroll area for list items
