@@ -231,14 +231,14 @@ def setup_loguru(log_level_std='INFO', log_level_log='INFO', log_path=None, log_
 def exit_yes_no(msg, title=None, display_exiting=False):
     """ displays msg and prompts whether to continue or not"""
 
-    import pyautogui
+    import pyautobek
     from loguru import logger
 
-    choice = pyautogui.confirm("Do you want to continue running or set {USE} based on the longest substitutions? Check the log for values.\n\nContinue?",
+    choice = pyautobek.confirm("Do you want to continue running or set {USE} based on the longest substitutions? Check the log for values.\n\nContinue?",
                                title="Check the log for values.\n\nContinue?", buttons=['Yes', 'No'])
     if choice == "No":
         if display_exiting:
-            pyautogui.alert("Exiting", "Alert")
+            pyautobek.alert("Exiting", "Alert")
         logger.debug("here")
         exit()
 
@@ -246,7 +246,7 @@ def exit_yes_no(msg, title=None, display_exiting=False):
 def exit_yes(msg: str, title: str = None, *, errmsg: str = None, raise_err: bool=False) -> None:
     """ exits program after giving user a popup window and raising an error. """
 
-    import pyautogui
+    import pyautobek
     from loguru import logger
 
     if not errmsg:
@@ -254,7 +254,7 @@ def exit_yes(msg: str, title: str = None, *, errmsg: str = None, raise_err: bool
     if not title:
         title = "** Exiting Program **"
     logger.debug("in 'exit_yes'")
-    pyautogui.alert(msg, title)
+    pyautobek.alert(msg, title)
     if raise_err:
         logger.debug("ready to raise error'")
         raise Exception(errmsg)
@@ -358,7 +358,7 @@ def bad_path_create(path, msg=None):
     """ checks for directory existence and creates if not found"""
 
     import os
-    import pyautogui
+    import pyautobek
     from loguru import logger
 
     if msg is None:
@@ -366,7 +366,7 @@ def bad_path_create(path, msg=None):
                "\n\nCalled from " + calling_func(level=2))
     if not os.path.isdir(path):
         logger.debug("here")
-        pyautogui.alert(msg, "Adding Directory via bad_path_create")
+        pyautobek.alert(msg, "Adding Directory via bad_path_create")
         os.makedirs(path)
 
 
