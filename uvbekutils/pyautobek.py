@@ -107,7 +107,7 @@ def confirm(msg, title="Confirm", buttons=None):
     dialog.setLayout(layout)
     dialog.exec()
 
-    return result[0]
+    return result[0].lower()
 
 
 if __name__ == "__main__":
