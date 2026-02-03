@@ -10,7 +10,7 @@ def list_pick(lst, title='', msg='', select_mode='single', pre_select=False):
         pre_select: if True, the first item starts selected; if False, nothing is selected
 
     Returns:
-        list of selected values, or None if cancelled
+        list of selected values (empty list if OK with no selections), or None if cancelled
     """
 
     import sys
