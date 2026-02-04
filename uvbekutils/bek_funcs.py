@@ -21,6 +21,7 @@ log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO
 
 def safe_str(value):
     """Convert value to string, handle NaN"""
+    import pandas as pd
     return '' if pd.isna(value) else str(value)
 
 
