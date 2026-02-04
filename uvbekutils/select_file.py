@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 import sys
 
 
-def select_file(title: str, start_dir: str, files_like: str, choices: list[str], mode: str = "file", title2: str = "") -> str | None:
+def select_file(title: str, start_dir: str, files_like: str, choices: list[str] = ["Select", "Cancel"], mode: str = "file", title2: str = "") -> str | None:
     """
     Display a file/directory selection dialog.
 
