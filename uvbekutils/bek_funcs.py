@@ -19,6 +19,12 @@ To add to an environment, in terminal:
 
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
+def safe_str(value):
+    """Convert value to string, handle NaN"""
+    return '' if pd.isna(value) else str(value)
+
+
+tmp_label_text = re.sub(fld, safe_str(df.at[index, fld]), tmp_label_text, flags=re.IGNORECASE)
 
 def load_workbook_w_filepath(file, *args, **kwargs):
     """ openpyxl load_workbook that adds a filepath attribute
