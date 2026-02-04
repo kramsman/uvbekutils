@@ -234,8 +234,7 @@ def exit_yes_no(msg, title=None, display_exiting=False):
     from uvbekutils import pyautobek
     from loguru import logger
 
-    choice = pyautobek.confirm("Do you want to continue running or set {USE} based on the longest substitutions? Check the log for values.\n\nContinue?",
-                               title="Check the log for values.\n\nContinue?", buttons=['Yes', 'No'])
+    choice = pyautobek.confirm(msg, title, buttons=['Yes', 'No'])
     if choice == "No":
         if display_exiting:
             pyautobek.alert("Exiting", "Alert")
