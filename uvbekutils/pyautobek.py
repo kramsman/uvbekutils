@@ -1,5 +1,19 @@
-"""
-pyautobek - A PySide6-based module that mimics pyautogui dialog functions.
+"""A PySide6-based module that mimics pyautogui dialog functions.
+
+This module provides lightweight replacements for pyautogui's dialog
+functions (``alert`` and ``confirm``) using PySide6/Qt widgets. Dialogs
+are displayed as always-on-top windows with word-wrapped messages.
+
+Functions:
+    alert: Display an alert dialog with an Ok button.
+    confirm: Display a confirmation dialog with custom buttons.
+
+Example::
+
+    from uvbekutils.pyautobek import alert, confirm
+
+    alert("Operation complete.", "Status")
+    choice = confirm("Save changes?", "Confirm", ["Yes", "No"])
 """
 
 import sys
@@ -24,12 +38,18 @@ def _get_app():
 
 
 def alert(msg, title="Alert"):
-    """
-    Display an alert dialog with a message and an Ok button.
+    """Display an alert dialog with a message and an Ok button.
 
-    Parameters:
+    Creates a modal, always-on-top Qt dialog containing the message
+    and a single Ok button. The dialog blocks until the user clicks Ok.
+
+    Args:
         msg (str): The message to display in the dialog.
-        title (str): The title of the dialog window.
+        title (str): The title of the dialog window. Defaults to "Alert".
+
+    Example::
+
+        alert("File saved successfully.", "Status")
     """
     app = _get_app()
 
@@ -58,17 +78,26 @@ def alert(msg, title="Alert"):
 
 
 def confirm(msg, title="Confirm", buttons=None):
-    """
-    Display a confirmation dialog with custom buttons.
+    """Display a confirmation dialog with custom buttons.
 
-    Parameters:
+    Creates a modal, always-on-top Qt dialog containing the message
+    and a row of buttons. The dialog blocks until the user clicks one
+    of the buttons.
+
+    Args:
         msg (str): The message to display in the dialog.
-        title (str): The title of the dialog window.
-        buttons (list): A list of strings for button labels.
-                       Defaults to ["Ok", "Cancel"] if not provided.
+        title (str): The title of the dialog window. Defaults to "Confirm".
+        buttons (list[str] | None): A list of strings for button labels.
+            Defaults to ``["Ok", "Cancel"]`` if not provided.
 
     Returns:
-        str: The text of the clicked button.
+        str: The lowercase text of the clicked button.
+
+    Example::
+
+        choice = confirm("Save changes?", "Confirm", ["Yes", "No"])
+        if choice == "yes":
+            save()
     """
     if buttons is None:
         buttons = ["Ok", "Cancel"]
