@@ -24,8 +24,6 @@ def safe_str(value):
     return '' if pd.isna(value) else str(value)
 
 
-tmp_label_text = re.sub(fld, safe_str(df.at[index, fld]), tmp_label_text, flags=re.IGNORECASE)
-
 def load_workbook_w_filepath(file, *args, **kwargs):
     """ openpyxl load_workbook that adds a filepath attribute
 
