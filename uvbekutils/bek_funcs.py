@@ -651,35 +651,46 @@ True for concentrated addresses (present in dictionary), False otherwise. """
                                                clean_field(address)), {'desc': "", 'remove': ""})['remove']
     return desc
 
+
 def scroll_box(txt: str, *, title: str=None, wrap_lines: bool=True ) -> None:
-    """ display a box of text with scroll bars """
+  """ display a box of text with scroll bars """
 
-    from PySide6.QtWidgets import QApplication, QMainWindow, QTextEdit
-    import sys
+  from PySide6.QtWidgets import QApplication, QMainWindow, QTextEdit
+  import sys
 
-    app = QApplication(sys.argv)
+  # Reuse existing QApplication if one exists, otherwise create new one
+  app = QApplication.instance()
+  app_created = False
+  if app is None:
+      app = QApplication(sys.argv)
+      app_created = True
 
-    # Create main window with title
-    window = QMainWindow()
-    window.setWindowTitle(title)
+  # Create main window with title
+  window = QMainWindow()
+  window.setWindowTitle(title)
 
-    # Create text edit widget
-    text_edit = QTextEdit()
-    text_edit.setPlainText(txt)
-    text_edit.setReadOnly(True)
+  # Create text edit widget
+  text_edit = QTextEdit()
+  text_edit.setPlainText(txt)
+  text_edit.setReadOnly(True)
 
-    # Enable or disable line wrapping which introduces horizontal scroll bar
-    if wrap_lines:
-        text_edit.setLineWrapMode(QTextEdit.WidgetWidth)
-    else:
-        text_edit.setLineWrapMode(QTextEdit.NoWrap)
+  # Enable or disable line wrapping which introduces horizontal scroll bar
+  if wrap_lines:
+      text_edit.setLineWrapMode(QTextEdit.WidgetWidth)
+  else:
+      text_edit.setLineWrapMode(QTextEdit.NoWrap)
 
-    # Set text edit as the central widget
-    window.setCentralWidget(text_edit)
-    window.resize(600, 400)
-    window.show()
+  # Set text edit as the central widget
+  window.setCentralWidget(text_edit)
+  window.resize(600, 400)
+  window.show()
 
-    sys.exit(app.exec())
+  if app_created:
+      sys.exit(app.exec())
+  else:
+      app.exec()
+
+
 
 if __name__ == '__main__':
 
