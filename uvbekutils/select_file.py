@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 import sys
 
 
-def select_file(title: str, start_dir: str, files_like: str, choices: list[str] = ["Select", "Cancel"], mode: str = "file", title2: str = "", show_hidden_button: bool = False, show_sort_button: bool = False) -> str | None:
+def select_file(title: str, start_dir: str, files_like: str, choices: list[str] = ["Select", "Cancel"], mode: str = "file", title2: str = "", show_hiddenbutton: bool = False, show_sortbutton: bool = False) -> str | None:
     """
     Display a file/directory selection dialog.
 
@@ -20,8 +20,8 @@ def select_file(title: str, start_dir: str, files_like: str, choices: list[str] 
         choices: List of two button labels [select_label, cancel_label]
         mode: "file" (select files), "dir" (select directories), or "both"
         title2: Optional subtitle displayed below the window title
-        show_hidden_button: Show checkbox to toggle hidden files (default False)
-        show_sort_button: Show checkbox to toggle sort order (default False)
+        show_hiddenbutton: Show checkbox to toggle hidden files (default False)
+        show_sortbutton: Show checkbox to toggle sort order (default False)
 
     Returns:
         Selected path as string, or None if cancelled
@@ -31,7 +31,7 @@ def select_file(title: str, start_dir: str, files_like: str, choices: list[str] 
     if app is None:
         app = QApplication(sys.argv)
 
-    dialog = FileSelectDialog(title, start_dir, files_like, choices, mode, title2, show_hidden_button, show_sort_button)
+    dialog = FileSelectDialog(title, start_dir, files_like, choices, mode, title2, show_hiddenbutton, show_sortbutton)
     result = dialog.exec()
 
     if result == QDialog.Accepted:
@@ -262,26 +262,14 @@ class FileSelectDialog(QDialog):
 
 
 if __name__ == "__main__":
-    selected = select_file(
-        title="Select a Python File",
-        start_dir="~/Downloads",
-        files_like="*.csv",
-        choices=["Select", "Cancel"],
-        mode="file",  # file, dir or both
-        title2="Select the latest user file that you can.  It should be the one you want that works just right.",
-        show_hidden_button=False,
-        show_sort_button=False
-    )
+    selected = select_file(title="Select a Python File", start_dir="~/Downloads", files_like="*.csv",
+                           choices=["Select", "Cancel"], mode="file",
+                           title2="Select the latest user file that you can.  It should be the one you want that works just right.",
+                           show_hiddenbutton=False, show_sortbutton=False)
     print(f"Selected: {selected}")
 
-    selected = select_file(
-        title="Select a Python File",
-        start_dir="~/Downloads",
-        files_like="*.csv",
-        choices=["Select", "Cancel"],
-        mode="file",  # file, dir or both
-        title2="Select the latest user file that you can.  It should be the one you want that works just right.",
-        show_hidden_button=True,
-        show_sort_button=True
-    )
+    selected = select_file(title="Select a Python File", start_dir="~/Downloads", files_like="*.csv",
+                           choices=["Select", "Cancel"], mode="file",
+                           title2="Select the latest user file that you can.  It should be the one you want that works just right.",
+                           show_hiddenbutton=True, show_sortbutton=True)
     print(f"Selected: {selected}")
