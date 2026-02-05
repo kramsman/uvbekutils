@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 import sys
 
 
-def select_file(title: str, start_dir: str, files_like: str, choices: list[str] = ["Select", "Cancel"], mode: str = "file", title2: str = "") -> str | None:
+def select_file(title: str, start_dir: str, files_like: str, choices: list[str] = ["Select", "Cancel"], mode: str = "file", title2: str = "", show_hidden_button: bool = False, show_sort_button: bool = False) -> str | None:
     """
     Display a file/directory selection dialog.
 
@@ -20,6 +20,8 @@ def select_file(title: str, start_dir: str, files_like: str, choices: list[str] 
         choices: List of two button labels [select_label, cancel_label]
         mode: "file" (select files), "dir" (select directories), or "both"
         title2: Optional subtitle displayed below the window title
+        show_hidden_button: Show checkbox to toggle hidden files (default False)
+        show_sort_button: Show checkbox to toggle sort order (default False)
 
     Returns:
         Selected path as string, or None if cancelled
@@ -29,7 +31,7 @@ def select_file(title: str, start_dir: str, files_like: str, choices: list[str] 
     if app is None:
         app = QApplication(sys.argv)
 
-    dialog = FileSelectDialog(title, start_dir, files_like, choices, mode, title2)
+    dialog = FileSelectDialog(title, start_dir, files_like, choices, mode, title2, show_hidden_button, show_sort_button)
     result = dialog.exec()
 
     if result == QDialog.Accepted:
@@ -38,7 +40,7 @@ def select_file(title: str, start_dir: str, files_like: str, choices: list[str] 
 
 
 class FileSelectDialog(QDialog):
-    def __init__(self, title: str, start_dir: str, files_like: str, choices: list[str], mode: str, title2: str = ""):
+    def __init__(self, title: str, start_dir: str, files_like: str, choices: list[str], mode: str, title2: str = "", show_hidden_button: bool = False, show_sort_button: bool = False):
         super().__init__()
         self.current_dir = Path(start_dir).expanduser().resolve()
         self.files_like = files_like if files_like.strip() else "*"
@@ -46,6 +48,8 @@ class FileSelectDialog(QDialog):
         self.title2 = title2
         self.selected_path = None
         self.item_paths = []
+        self.show_hidden_button = show_hidden_button
+        self.show_sort_button = show_sort_button
 
         self.setWindowTitle(title)
         self.setMinimumSize(750, 400)
@@ -71,16 +75,20 @@ class FileSelectDialog(QDialog):
         layout.addWidget(filter_label)
 
         # Sort alpha checkbox (default is sort by date modified)
-        self.sort_alpha_cb = QCheckBox("Sort alpha")
-        self.sort_alpha_cb.setChecked(False)
-        self.sort_alpha_cb.stateChanged.connect(self.on_sort_toggled)
-        layout.addWidget(self.sort_alpha_cb)
+        self.sort_alpha_cb = None
+        if self.show_sort_button:
+            self.sort_alpha_cb = QCheckBox("Sort alpha")
+            self.sort_alpha_cb.setChecked(False)
+            self.sort_alpha_cb.stateChanged.connect(self.on_sort_toggled)
+            layout.addWidget(self.sort_alpha_cb)
 
         # Show hidden checkbox
-        self.show_hidden_cb = QCheckBox("Show hidden")
-        self.show_hidden_cb.setChecked(False)
-        self.show_hidden_cb.stateChanged.connect(self.on_hidden_toggled)
-        layout.addWidget(self.show_hidden_cb)
+        self.show_hidden_cb = None
+        if self.show_hidden_button:
+            self.show_hidden_cb = QCheckBox("Show hidden")
+            self.show_hidden_cb.setChecked(False)
+            self.show_hidden_cb.stateChanged.connect(self.on_hidden_toggled)
+            layout.addWidget(self.show_hidden_cb)
 
         # List widget
         self.list_widget = QListWidget()
@@ -144,7 +152,7 @@ class FileSelectDialog(QDialog):
         # Categorize entries
         dirs = []
         files = []
-        show_hidden = self.show_hidden_cb.isChecked()
+        show_hidden = self.show_hidden_cb.isChecked() if self.show_hidden_cb else False
         try:
             for entry in self.current_dir.iterdir():
                 # Skip hidden files/dirs if checkbox unchecked
@@ -158,7 +166,7 @@ class FileSelectDialog(QDialog):
             return
 
         # Sort (alphabetically if checked, by date modified if unchecked)
-        if self.sort_alpha_cb.isChecked():
+        if self.sort_alpha_cb and self.sort_alpha_cb.isChecked():
             dirs.sort(key=lambda p: p.name.lower())
             files.sort(key=lambda p: p.name.lower())
         else:
@@ -260,6 +268,20 @@ if __name__ == "__main__":
         files_like="*.csv",
         choices=["Select", "Cancel"],
         mode="file",  # file, dir or both
-        title2 = "Slect the latest user file that you can.  It should be the one you want that works just right."
+        title2="Select the latest user file that you can.  It should be the one you want that works just right.",
+        show_hidden_button=False,
+        show_sort_button=False
+    )
+    print(f"Selected: {selected}")
+
+    selected = select_file(
+        title="Select a Python File",
+        start_dir="~/Downloads",
+        files_like="*.csv",
+        choices=["Select", "Cancel"],
+        mode="file",  # file, dir or both
+        title2="Select the latest user file that you can.  It should be the one you want that works just right.",
+        show_hidden_button=True,
+        show_sort_button=True
     )
     print(f"Selected: {selected}")
