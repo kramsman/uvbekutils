@@ -18,7 +18,7 @@ module-root = "."
 
 [project]
 name = "uvbekutils"
-version = "0.1.0"
+version = "0.2.0"
 description = "utility tools using uv to manage the environment now with uv and no tkinter"
 requires-python = ">=3.12"
 dependencies = [
