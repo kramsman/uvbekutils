@@ -240,7 +240,7 @@ def exit_yes_no(msg, title=None, display_exiting=False):
     from loguru import logger
 
     choice = pyautobek.confirm(msg, title, buttons=['Yes', 'No'])
-    if choice == "No":
+    if choice == "no":
         if display_exiting:
             pyautobek.alert("Exiting", "Alert")
         logger.debug("here")
