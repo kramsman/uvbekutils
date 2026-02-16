@@ -173,6 +173,7 @@ def exe_file():
 def exe_path():
     """ return the path of location where exe is running """
 
+    from pathlib import Path
     from uvbekutils import exe_file
     result = exe_file()
     if result is None:
