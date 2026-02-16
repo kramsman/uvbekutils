@@ -226,7 +226,11 @@ def setup_loguru(log_level_std='INFO', log_level_log='INFO', log_path=None, log_
     if log_file:
         logger.trace("setting log_file info - logger.remove(0) next")
 
-        logger.remove(0)
+        try:
+            logger.remove(0)
+        except ValueError:
+            pass
+
         logfile = exe_file().with_suffix(".log")
         try:
             os.remove(logfile)
