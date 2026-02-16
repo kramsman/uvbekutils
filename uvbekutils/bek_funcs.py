@@ -159,8 +159,10 @@ def exe_file():
     # determine if application is running as a script file or frozen exe
     if getattr(sys, 'frozen', False):
         exe_file = Path(sys.executable)
-    elif __file__:
-        # exe_file = Path(__file__).parents[0]
+    # elif __file__:
+    #     # exe_file = Path(__file__).parents[0]
+    #     exe_file = Path(__main__.__file__)
+    elif hasattr(__main__, '__file__') and __main__.__file__:
         exe_file = Path(__main__.__file__)
     else:
         exe_file = None
