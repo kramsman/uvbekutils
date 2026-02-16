@@ -164,10 +164,10 @@ def exe_file():
     #     exe_file = Path(__main__.__file__)
     elif hasattr(__main__, '__file__') and __main__.__file__:
         exe_file = Path(__main__.__file__)
+    elif sys.argv[0]:
+        exe_file = Path(sys.argv[0])
     else:
-        exe_file = None
-
-    return exe_file
+        exe_file = Path("app")
 
 
 def exe_path():
