@@ -169,6 +169,7 @@ def exe_file():
     else:
         exe_file = Path("app")
 
+    return exe_file
 
 def exe_path():
     """ return the path of location where exe is running """
