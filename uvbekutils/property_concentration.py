@@ -23,9 +23,23 @@ addr_concentration_dict= dict([
           )
     ])
 
-def conc_addr(concentration_dict, state: str = None, city: str = None, address: str = None) -> bool:
-    """ state/county/city/address are passed the cleaned using functon 'clean_field'; Uses removedict dictionary to return
-True for concentrated addresses (present in dictionary), False otherwise. """
+def conc_addr(concentration_dict: dict, state: str | None = None, city: str | None = None, address: str | None = None) -> bool:
+    """Check whether a state/city/address combination is in the concentration dictionary.
+
+    State, city, and address are cleaned using the 'clean_field' function
+    before lookup.
+
+    Args:
+        concentration_dict: Dictionary mapping (state, city, address) tuples
+            to concentration metadata.
+        state: State code or name.
+        city: City name.
+        address: Street address.
+
+    Returns:
+        True if the cleaned address is found in concentration_dict,
+        False otherwise.
+    """
 
     from bekutils import clean_field
 
@@ -34,9 +48,23 @@ True for concentrated addresses (present in dictionary), False otherwise. """
     return concentrated
 
 
-def conc_addr_desc(concentration_dict: dict, state: str = None, city: str = None, address: str = None) -> str:
-    """ state/county/city/address are passed the cleaned using functon 'clean_field'; Uses removedict dictionary to return
-True for concentrated addresses (present in dictionary), False otherwise. """
+def conc_addr_desc(concentration_dict: dict, state: str | None = None, city: str | None = None, address: str | None = None) -> str:
+    """Return the description for a concentrated address entry.
+
+    State, city, and address are cleaned using the 'clean_field' function
+    before lookup.
+
+    Args:
+        concentration_dict: Dictionary mapping (state, city, address) tuples
+            to concentration metadata.
+        state: State code or name.
+        city: City name.
+        address: Street address.
+
+    Returns:
+        The 'desc' string for the matching address entry, or an empty string
+        if not found in concentration_dict.
+    """
 
     from bekutils import clean_field
 
@@ -44,9 +72,23 @@ True for concentrated addresses (present in dictionary), False otherwise. """
                                                clean_field(address)), {'desc': "", 'remove': ""})['desc']
     return desc
 
-def conc_addr_remove_desc(concentration_dict: dict, state: str = None, city: str = None, address: str = None) -> str:
-    """ state/county/city/address are passed the cleaned using functon 'clean_field'; Uses removedict dictionary to return
-True for concentrated addresses (present in dictionary), False otherwise. """
+def conc_addr_remove_desc(concentration_dict: dict, state: str | None = None, city: str | None = None, address: str | None = None) -> str:
+    """Return the removal description for a concentrated address entry.
+
+    State, city, and address are cleaned using the 'clean_field' function
+    before lookup.
+
+    Args:
+        concentration_dict: Dictionary mapping (state, city, address) tuples
+            to concentration metadata.
+        state: State code or name.
+        city: City name.
+        address: Street address.
+
+    Returns:
+        The 'remove' string for the matching address entry, or an empty string
+        if not found in concentration_dict.
+    """
 
     from bekutils import clean_field
 

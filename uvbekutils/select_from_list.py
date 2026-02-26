@@ -1,13 +1,20 @@
 
-def select_from_list(lst, box_text='', select_type='check', pre_select=False):
-    """ select a list of values from a list using a radio button or check list.
-    Clicking 'read' with no selections returns None.
+def select_from_list(lst: list, box_text: str = '', select_type: str = 'check', pre_select: bool = False) -> list | str | None:
+    """Select values from a list using a GUI checkbox or radio button dialog.
+
+    Clicking 'Read' with no selections returns None.
 
     Args:
-        lst (): list of text items to select from
-        box_text (): title showing at top of selection
-        select_type (): either 'check' for checkbox which allows multi, or 'radio' allows one
-        pre_select (): for checkbox whether boxes default to checked (true) or empty (false)
+        lst: List of text items to display and select from.
+        box_text: Title text shown at the top of the selection box.
+        select_type: Either 'check' for checkboxes (multi-select) or
+            'radio' for radio buttons (single-select).
+        pre_select: For checkbox mode, whether boxes default to checked
+            (True) or unchecked (False).
+
+    Returns:
+        For 'radio': the single selected string, or None if nothing selected.
+        For 'check': a list of selected strings, or None if nothing selected.
     """
 
     import PySimpleGUI as sg

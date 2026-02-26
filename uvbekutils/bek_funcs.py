@@ -15,21 +15,39 @@ To add to an environment, in terminal:
 
 """
 
+from __future__ import annotations
+
+from pathlib import Path
+
+from openpyxl.workbook import Workbook
+
 # TODO what to do with loggers?
 
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
-def safe_str(value):
-    """Convert value to string, handle NaN"""
+def safe_str(value: object) -> str:
+    """Convert a value to string, returning empty string for NaN.
+
+    Args:
+        value: Any value to convert; NaN yields empty string.
+
+    Returns:
+        Empty string if value is NaN, otherwise str(value).
+    """
     import pandas as pd
     return '' if pd.isna(value) else str(value)
 
 
-def load_workbook_w_filepath(file, *args, **kwargs):
-    """ openpyxl load_workbook that adds a filepath attribute
+def load_workbook_w_filepath(file: Path, *args, **kwargs) -> Workbook:
+    """Load an openpyxl workbook and attach the source path as a filepath attribute.
 
     Args:
-        file (): PosixPath path and filename of workbook
+        file: Path to the workbook file.
+        *args: Positional arguments passed to openpyxl.load_workbook.
+        **kwargs: Keyword arguments passed to openpyxl.load_workbook.
+
+    Returns:
+        The loaded Workbook with a filepath attribute set to file.
     """
     from openpyxl import load_workbook
     wb = load_workbook(file, *args, **kwargs)
@@ -37,9 +55,16 @@ def load_workbook_w_filepath(file, *args, **kwargs):
     return wb
 
 
-def wb_path(wb):
-    """ returns the filepath attribute set (usually by using load_workbook_w_filepath) or None.
-    can reference book name of worksheet using ws.parent.filepath.name.
+def wb_path(wb: Workbook) -> Path | None:
+    """Return the filepath attribute of a workbook, or None if not set.
+
+    Can reference book name of a worksheet via ws.parent.filepath.name.
+
+    Args:
+        wb: An openpyxl Workbook, typically loaded with load_workbook_w_filepath.
+
+    Returns:
+        The Path stored in wb.filepath, or None if the attribute does not exist.
     """
 
     # return (wb.filepath if hasattr(wb,'filepath') else None)
@@ -49,9 +74,15 @@ def wb_path(wb):
         return None
 
 
-def wb_name(wb):
-    """ returns the name from the filepath attribute set (usually by using load_workbook_w_filepath) as string.
-    If attribute not available return 'Unknown'.
+def wb_name(wb: Workbook) -> str:
+    """Return the filename of a workbook as a string, or 'Unknown' if not set.
+
+    Args:
+        wb: An openpyxl Workbook, typically loaded with load_workbook_w_filepath.
+
+    Returns:
+        The filename string from wb.filepath.name, or 'Unknown' if the
+        filepath attribute does not exist.
     """
 
     if hasattr(wb, 'filepath'):
@@ -60,16 +91,33 @@ def wb_name(wb):
         return 'Unknown'
 
 
-def bek_excel_titles(wb, sheet_name_list, cell_infos = None, auto_size_before=None, auto_size_after=None):
-    """
-    Write titles to an Excel file.  Can autosize before or after titles are inserted (usually before because titles
-    are wide) to avoid ##### in cells.
+def bek_excel_titles(
+    wb: Workbook,
+    sheet_name_list: list | str,
+    cell_infos: list | None = None,
+    auto_size_before: bool | None = None,
+    auto_size_after: bool | None = None,
+) -> None:
+    """Write formatted cell values and titles to sheets in an Excel workbook.
+
+    Autosizing before title insertion is recommended to avoid '######' in cells,
+    since title text is typically wider than column data.
+
     Args:
-        sheet_name_list (): list of sheet names to add titles. 'True' will put titles on all.
-        cell_infos (): list of cell attributes used to format specified as dictionaries. Rows and cols 1 based
-        numerics. 'value's are replaced as text; font is passed as eval of cell value (note in function):
-            {'row':1,'col':1, 'cell_attr':"value", 'cell_value':'Summary Report'},
-            {'row':1,'col':1, 'cell_attr':"font", 'cell_value':'Font(b=True, size=20)'},
+        wb: The openpyxl Workbook to modify.
+        sheet_name_list: Sheet name or list of sheet names to add titles to.
+            Pass True to apply to all sheets.
+        cell_infos: List of cell-attribute dicts. Each dict specifies a cell
+            by 1-based row/col and a cell attribute to set. Use 'value' for
+            text and 'font' for a Font(...) expression string. Example::
+
+                [
+                    {'row': 1, 'col': 1, 'cell_attr': 'value', 'cell_value': 'Report'},
+                    {'row': 1, 'col': 1, 'cell_attr': 'font',  'cell_value': 'Font(b=True, size=20)'},
+                ]
+
+        auto_size_before: If truthy, autosize all columns before writing cells.
+        auto_size_after: If truthy, autosize all columns after writing cells.
     """
 
     from openpyxl.styles import Font
@@ -105,18 +153,23 @@ def bek_excel_titles(wb, sheet_name_list, cell_infos = None, auto_size_before=No
             autosize_xls_cols(sh)
 
 
-def bek_write_excel(df, sheet_name, startrow, cell_infos = None,):
-    """
-    Write df to an excel file with the same name as the py file suffixed with xlsx in the current directory.
-    Autosizes before titles to avoid ##### in cells.
+def bek_write_excel(
+    df: pd.DataFrame,
+    sheet_name: str,
+    startrow: int,
+    cell_infos: list | None = None,
+) -> None:
+    """Write a DataFrame to an Excel file named after the running script.
+
+    Autosizes columns before writing title cells to avoid '######'. The output
+    file is placed in the same directory as the running executable.
+
     Args:
-        df (): dataframe being written out
-        sheet_name ():
-        startrow (): the row where the df rows will begin to be written
-        cell_infos (): list of cell attributes used to format specified as dictionaries. Rows and cols 1 based
-        numerics. 'value's are replaced as text; font is passed as eval of cell value (note in function):
-            {'row':1,'col':1, 'cell_attr':"value", 'cell_value':'Summary Report'},
-            {'row':1,'col':1, 'cell_attr':"font", 'cell_value':'Font(b=True, size=20)'},
+        df: DataFrame to write to Excel.
+        sheet_name: Name of the worksheet to write the DataFrame to.
+        startrow: Row index (0-based) where the DataFrame header will be written.
+        cell_infos: Optional list of cell-attribute dicts for formatting. See
+            bek_excel_titles for format details.
     """
 
     from pathlib import Path
@@ -148,8 +201,15 @@ def bek_write_excel(df, sheet_name, startrow, cell_infos = None,):
 
     writer.close()
 
-def exe_file():
-    """ return the file of location where exe is running """
+def exe_file() -> Path:
+    """Return the Path of the currently running script or frozen executable.
+
+    Handles three cases: frozen executable (PyInstaller), normal script run,
+    and fallback to sys.argv[0] or 'app'.
+
+    Returns:
+        Path to the running executable or script file.
+    """
 
     import sys
     from pathlib import Path
@@ -171,8 +231,13 @@ def exe_file():
 
     return exe_file
 
-def exe_path():
-    """ return the path of location where exe is running """
+def exe_path() -> Path:
+    """Return the directory Path containing the currently running executable.
+
+    Returns:
+        Parent directory of exe_file(), or the current working directory
+        if exe_file() returns None.
+    """
 
     from pathlib import Path
     from uvbekutils import exe_file
@@ -185,12 +250,27 @@ def exe_path():
     return exe_path
 
 
-def setup_loguru(log_level_std='INFO', log_level_log='INFO', log_path=None, log_mode='w', log_file=True):
-    """ set log file path to location based on whether setup file is used or not.  If not, use EXE.
-        using loguru could put in downloads (next line)
-        but I'm locating it once we know what section
-        is running, either with the setup file or the EXE if no setup, eg updating zip file.
-        logfile = pathlib.Path.home() / "Downloads" / (Path(__file__).name + ".log")
+def setup_loguru(
+    log_level_std: str = 'INFO',
+    log_level_log: str = 'INFO',
+    log_path: Path | None = None,
+    log_mode: str = 'w',
+    log_file: bool = True,
+) -> Logger:
+    """Configure and return a loguru Logger with stdout and optional file sinks.
+
+    Log file is placed in the same directory as the running executable. Any
+    existing log file is removed before a new one is opened.
+
+    Args:
+        log_level_std: Minimum log level for stdout output (e.g. 'INFO', 'DEBUG').
+        log_level_log: Minimum log level for the log file (e.g. 'DEBUG', 'TRACE').
+        log_path: Directory for the log file. Defaults to exe_path() if None.
+        log_mode: File open mode for the log file ('w' to overwrite, 'a' to append).
+        log_file: If True, create a log file sink in addition to stdout.
+
+    Returns:
+        The configured loguru Logger instance.
     """
 
     # TODO suppress error if log not found which happens on first run
@@ -245,8 +325,14 @@ def setup_loguru(log_level_std='INFO', log_level_log='INFO', log_path=None, log_
     return logger
 
 
-def exit_yes_no(msg, title=None, display_exiting=False):
-    """ displays msg and prompts whether to continue or not"""
+def exit_yes_no(msg: str, title: str | None = None, display_exiting: bool = False) -> None:
+    """Display a Yes/No prompt and exit the program if the user chooses No.
+
+    Args:
+        msg: Message text to display in the dialog.
+        title: Optional dialog window title.
+        display_exiting: If True, show an 'Exiting' alert before exiting.
+    """
 
     from uvbekutils import pyautobek
     from loguru import logger
@@ -259,8 +345,16 @@ def exit_yes_no(msg, title=None, display_exiting=False):
         exit()
 
 
-def exit_yes(msg: str, title: str = None, *, errmsg: str = None, raise_err: bool=False) -> None:
-    """ exits program after giving user a popup window and raising an error. """
+def exit_yes(msg: str, title: str | None = None, *, errmsg: str | None = None, raise_err: bool = False) -> None:
+    """Display an alert popup and then exit or raise an exception.
+
+    Args:
+        msg: Message text displayed in the popup.
+        title: Optional dialog window title. Defaults to '** Exiting Program **'.
+        errmsg: Error message for the raised exception. Defaults to msg with
+            newlines removed.
+        raise_err: If True, raise an Exception instead of calling exit().
+    """
 
     from uvbekutils import pyautobek
     from loguru import logger
@@ -280,8 +374,17 @@ def exit_yes(msg: str, title: str = None, *, errmsg: str = None, raise_err: bool
 
 
 def is_number(s: str) -> bool:
-    """  Used as check, particularly before trying to set zip to numeric for lookup.
-    expects param to be a string to trap all types of data.   """
+    """Check whether a value can be interpreted as a number.
+
+    Handles np.nan explicitly, since np.nan is a float and would otherwise
+    pass a float() conversion check.
+
+    Args:
+        s: Value to test, expected to be passed as a string.
+
+    Returns:
+        True if s can be converted to float and is not NaN, False otherwise.
+    """
 
     import numpy as np
     from loguru import logger
@@ -303,12 +406,19 @@ def is_number(s: str) -> bool:
         return False
 
 
-def clean_field(fld, case_convert='lower'):
-    """
-    returns a string in lower, strip, no space, no -, no ., no '
-    can be used with dataframe like IP['clean2'] = IP['B'].apply(clean_field, convert_case='keep')
-    1/28/23 added optional parameter convert_case defaulting to lower, as was done before, but allowing 'upper' or
-    'keep'.
+def clean_field(fld: str, case_convert: str = 'lower') -> str:
+    """Normalize a string by stripping whitespace and removing special characters.
+
+    Removes spaces, apostrophes, periods, and hyphens. Optionally converts case.
+    Compatible with DataFrame.apply: ``df['col'].apply(clean_field)``.
+
+    Args:
+        fld: Value to clean; will be cast to str before processing.
+        case_convert: Case conversion to apply. One of 'lower', 'upper', or
+            'keep' (no conversion).
+
+    Returns:
+        Cleaned and case-converted string.
     """
 
     #TODO: pass characters to be removed as string
@@ -327,8 +437,15 @@ def clean_field(fld, case_convert='lower'):
     return return_fld
 
 
-def autosize_xls_cols(ws):
-    """ BEKs routine that works on the wks rather than df.  Datetime format set to width of 10. """
+def autosize_xls_cols(ws: Worksheet) -> None:
+    """Auto-fit column widths in an openpyxl worksheet to their content.
+
+    Datetime cells are treated as width 10. All other cells use the string
+    length of their value.
+
+    Args:
+        ws: The openpyxl Worksheet to resize.
+    """
 
     from loguru import logger
 
@@ -346,8 +463,15 @@ def autosize_xls_cols(ws):
         ws.column_dimensions[col].width = value + 1
 
 
-def bad_file_exit(file, msg=None, raise_err=False):
-    """ checks for file existence and exits if not found"""
+def bad_file_exit(file: Path, msg: str | None = None, raise_err: bool = False) -> None:
+    """Exit or raise an error if the given file does not exist.
+
+    Args:
+        file: Path to the file to check.
+        msg: Custom message for the alert. Defaults to a standard
+            'file does not exist' message.
+        raise_err: If True, raise an Exception instead of calling exit().
+    """
 
     from loguru import logger
 
@@ -358,8 +482,15 @@ def bad_file_exit(file, msg=None, raise_err=False):
         exit_yes(msg, raise_err=raise_err)
 
 
-def bad_path_exit(path, msg=None, raise_err=False):
-    """ checks for directory existence and exits if not found"""
+def bad_path_exit(path: Path, msg: str | None = None, raise_err: bool = False) -> None:
+    """Exit or raise an error if the given directory does not exist.
+
+    Args:
+        path: Path to the directory to check.
+        msg: Custom message for the alert. Defaults to a standard
+            'directory does not exist' message.
+        raise_err: If True, raise an Exception instead of calling exit().
+    """
 
     from loguru import logger
 
@@ -370,8 +501,14 @@ def bad_path_exit(path, msg=None, raise_err=False):
         exit_yes(msg, raise_err=raise_err)
 
 
-def bad_path_create(path, msg=None):
-    """ checks for directory existence and creates if not found"""
+def bad_path_create(path: Path, msg: str | None = None) -> None:
+    """Create a directory if it does not exist, alerting the user first.
+
+    Args:
+        path: Path to the directory to create if missing.
+        msg: Custom alert message. Defaults to a standard message naming
+            the path and the calling function.
+    """
 
     import os
     from uvbekutils import pyautobek
@@ -386,8 +523,17 @@ def bad_path_create(path, msg=None):
         os.makedirs(path)
 
 
-def calling_func(level=0):
-    """ returns the various levels of calling function.  0 is current, 1 is caller of current, etc """
+def calling_func(level: int = 0) -> str:
+    """Return the name and line number of a function in the call stack.
+
+    Args:
+        level: Stack depth to inspect. 0 is this function, 1 is its caller,
+            2 is the caller's caller, etc.
+
+    Returns:
+        A string with the function name and line number, or an error
+        description if the stack level is too deep.
+    """
 
     import inspect
     from loguru import logger
@@ -400,9 +546,21 @@ def calling_func(level=0):
     return func
 
 
-def read_file_to_df(file_with_path, **param_dict):
-    """reads either xlsx or csv into a dataframe using parms passed in dictionary. Non-applicable parms
-    are skipped."""
+def read_file_to_df(file_with_path: Path, **param_dict) -> pd.DataFrame | None:
+    """Read an xlsx or csv file into a DataFrame, filtering kwargs by file type.
+
+    Only keyword arguments valid for pd.read_excel or pd.read_csv are passed
+    through; unsupported keys are silently dropped.
+
+    Args:
+        file_with_path: Path to the input file (.xlsx or .csv).
+        **param_dict: Optional keyword arguments forwarded to the appropriate
+            pandas read function.
+
+    Returns:
+        DataFrame with the file contents, or None if the file type is not
+        supported (in practice exits via exit_yes before returning None).
+    """
 
     import inspect
     from pathlib import Path
@@ -431,15 +589,25 @@ def read_file_to_df(file_with_path, **param_dict):
     return df_temp
 
 
-def find_header_row_in_file(file_with_path, header_string, header_col, sheet_name=None):
-    """ identifies row with header by searching for header_string in header_col.  Used to skip blank and rows with titles.
+def find_header_row_in_file(
+    file_with_path: Path,
+    header_string: str,
+    header_col: str,
+    sheet_name: str | int | None = None,
+) -> int:
+    """Find the row index of a header by matching a string in a specific column.
 
-    Parameters
-    ----------
-    file_with_path : input file being read in, csv or xlsx?
-    header_string : string identifying header row, like 'pdiid'
-    header_col : alpha col to search for string, 'B' 'AA'
-    sheet_name : sheet name in input file in case multiple
+    Searches only the first 30 rows. Useful for files that have title or blank
+    rows above the actual data header.
+
+    Args:
+        file_with_path: Path to the input file (.xlsx or .csv).
+        header_string: String expected in the header cell (case-insensitive).
+        header_col: Excel-style column letter(s) to search in (e.g. 'A', 'B', 'AA').
+        sheet_name: Sheet name or index. Defaults to the first sheet (0) if None.
+
+    Returns:
+        0-based row index of the header row.
     """
 
     from openpyxl.utils.cell import coordinate_from_string
@@ -471,14 +639,23 @@ def find_header_row_in_file(file_with_path, header_string, header_col, sheet_nam
     return header_row
 
 
-def check_ws_headers(ws, vals):
-    """
-    Check list of (cell, val) tuples representing header labels in ws_to_chk and error if val not found in cell.
-    eg vals = [('A1', 'use'), ('B1', 'fromFilePath'), ('C1', 'fromfilename'), ....]
+def check_ws_headers(ws: Worksheet, vals: list[tuple[str, str]]) -> None:
+    """Verify that worksheet cells match expected header label strings.
+
+    Args:
+        ws: The openpyxl Worksheet to check.
+        vals: List of (cell_address, expected_value) tuples, e.g.
+            [('A1', 'use'), ('B1', 'fromFilePath')].
     """
 
-    def chk_header_vals(ws_to_chk, cell, val):
-        """ error if val not found in wks cell. """
+    def chk_header_vals(ws_to_chk: Worksheet, cell: str, val: str) -> None:
+        """Exit with an error if the cell value does not match val.
+
+        Args:
+            ws_to_chk: Worksheet containing the cell to check.
+            cell: Cell address string (e.g. 'A1').
+            val: Expected cell value (case-insensitive comparison).
+        """
         if str(ws_to_chk[cell].value).strip().lower() != str(val).lower():
             exit_yes((f"Column heading '{cell}' on Setup sheet '{ws_to_chk.title}' not equal to literal '{val}'."
                       f"\n\nIt is '{str(ws_to_chk[cell].value)}'."),
@@ -489,16 +666,21 @@ def check_ws_headers(ws, vals):
 
 # TODO Add in check_fie+headers like above with csv
 
-def text_box(txt, title='', box_title="", buttons=None):
-    """ Display text block with lines separated by \n and choice of buttons at bottom.
+def text_box(txt: str, title: str = '', box_title: str = '', buttons: list | None = None) -> str | None:
+    """Display a scrollable text block in a PySimpleGUI window with custom buttons.
 
-    Parameters
-    ----------
-    box_title :
-    title :
-    txt :
-    buttons :
+    Window size is auto-scaled to the text content, capped at 80 columns and
+    80 rows. A vertical scrollbar is added when the text exceeds 80 lines.
 
+    Args:
+        txt: Text to display, with lines separated by '\\n'.
+        title: Heading text rendered inside the window above the text area.
+        box_title: Title shown in the window title bar.
+        buttons: List of button label strings. Defaults to ['OK', 'Exit'].
+
+    Returns:
+        Lowercased label of the button clicked, or None if the window was
+        closed without a button press.
     """
 
     import PySimpleGUI as sg
@@ -550,10 +732,18 @@ def text_box(txt, title='', box_title="", buttons=None):
     return event
 
 
-def get_dir_name(box_title, title2, initial_dir):
-    """ show an "Open" dialog box and return the selected directory. Replaced askdirectory with PySimpleGUI
-    :param title2:
-    :type title2:
+def get_dir_name(box_title: str, title2: str, initial_dir: str | Path) -> Path:
+    """Show a folder-picker dialog and return the selected directory as a Path.
+
+    Exits via exit_yes if no directory is chosen.
+
+    Args:
+        box_title: Title shown in the window title bar.
+        title2: Heading text displayed inside the dialog.
+        initial_dir: Starting directory for the folder browser.
+
+    Returns:
+        Expanded Path of the chosen directory.
     """
 
     import os
@@ -583,10 +773,18 @@ def get_dir_name(box_title, title2, initial_dir):
     return Path(dir_name).expanduser()
 
 
-def get_file_name(box_title, title2, initial_dir):
-    """ show an "Open" dialog box and return the selected file name. Replaced askopenfilename with pyeasygui
-    :param title2: heading of the box
-    :type title2: text next to input field
+def get_file_name(box_title: str, title2: str, initial_dir: str | Path) -> Path:
+    """Show a file-picker dialog and return the selected file as a Path.
+
+    Exits via exit_yes if no file is chosen.
+
+    Args:
+        box_title: Title shown in the window title bar.
+        title2: Heading text displayed inside the dialog.
+        initial_dir: Starting directory for the file browser.
+
+    Returns:
+        Expanded Path of the chosen file.
     """
 
     import PySimpleGUI as sg
@@ -617,8 +815,20 @@ def get_file_name(box_title, title2, initial_dir):
     return Path(file_name).expanduser()
 
 
-def convert_bool(bool_val):
-    """ bool('FALSE') return True so need better """
+def convert_bool(bool_val: bool | str | None) -> bool:
+    """Convert a bool or string representation to a Python bool.
+
+    Handles the limitation that bool('FALSE') == True in Python.
+
+    Args:
+        bool_val: A bool, or a string of any case matching 'true' or 'false'.
+
+    Returns:
+        True or False.
+
+    Raises:
+        ValueError: If bool_val is None or not a recognized boolean string.
+    """
     if isinstance(bool_val, bool):
         return_val = bool_val
     else:
@@ -632,9 +842,23 @@ def convert_bool(bool_val):
     return return_val
 
 
-def conc_addr(concentration_dict, state: str = None, city: str = None, address: str = None) -> bool:
-    """ state/county/city/address are passed the cleaned using functon 'clean_field'; Uses removedict dictionary to return
-True for concentrated addresses (present in dictionary), False otherwise. """
+def conc_addr(concentration_dict: dict, state: str | None = None, city: str | None = None, address: str | None = None) -> bool:
+    """Check whether a state/city/address combination is in the concentration dictionary.
+
+    State, city, and address are cleaned using the 'clean_field' function
+    before lookup.
+
+    Args:
+        concentration_dict: Dictionary mapping (state, city, address) tuples
+            to concentration metadata.
+        state: State code or name.
+        city: City name.
+        address: Street address.
+
+    Returns:
+        True if the cleaned address is found in concentration_dict,
+        False otherwise.
+    """
 
     from uvbekutils import clean_field
 
@@ -643,9 +867,23 @@ True for concentrated addresses (present in dictionary), False otherwise. """
     return concentrated
 
 
-def conc_addr_desc(concentration_dict: dict, state: str = None, city: str = None, address: str = None) -> str:
-    """ state/county/city/address are passed the cleaned using functon 'clean_field'; Uses removedict dictionary to return
-True for concentrated addresses (present in dictionary), False otherwise. """
+def conc_addr_desc(concentration_dict: dict, state: str | None = None, city: str | None = None, address: str | None = None) -> str:
+    """Return the description for a concentrated address entry.
+
+    State, city, and address are cleaned using the 'clean_field' function
+    before lookup.
+
+    Args:
+        concentration_dict: Dictionary mapping (state, city, address) tuples
+            to concentration metadata.
+        state: State code or name.
+        city: City name.
+        address: Street address.
+
+    Returns:
+        The 'desc' string for the matching address entry, or an empty string
+        if not found in concentration_dict.
+    """
 
     from uvbekutils import clean_field
 
@@ -653,9 +891,23 @@ True for concentrated addresses (present in dictionary), False otherwise. """
                                                clean_field(address)), {'desc': "", 'remove': ""})['desc']
     return desc
 
-def conc_addr_remove_desc(concentration_dict: dict, state: str = None, city: str = None, address: str = None) -> str:
-    """ state/county/city/address are passed the cleaned using functon 'clean_field'; Uses removedict dictionary to return
-True for concentrated addresses (present in dictionary), False otherwise. """
+def conc_addr_remove_desc(concentration_dict: dict, state: str | None = None, city: str | None = None, address: str | None = None) -> str:
+    """Return the removal description for a concentrated address entry.
+
+    State, city, and address are cleaned using the 'clean_field' function
+    before lookup.
+
+    Args:
+        concentration_dict: Dictionary mapping (state, city, address) tuples
+            to concentration metadata.
+        state: State code or name.
+        city: City name.
+        address: Street address.
+
+    Returns:
+        The 'remove' string for the matching address entry, or an empty string
+        if not found in concentration_dict.
+    """
 
     from uvbekutils import clean_field
 
@@ -664,8 +916,18 @@ True for concentrated addresses (present in dictionary), False otherwise. """
     return desc
 
 
-def scroll_box(txt: str, *, title: str=None, wrap_lines: bool=True ) -> None:
-  """ display a box of text with scroll bars """
+def scroll_box(txt: str, *, title: str | None = None, wrap_lines: bool = True) -> None:
+  """Display a read-only scrollable text box using a PySide6 Qt window.
+
+  Reuses an existing QApplication if one is already running, otherwise
+  creates a new one and blocks until the window is closed.
+
+  Args:
+      txt: Text content to display.
+      title: Window title bar text.
+      wrap_lines: If True, wrap long lines to the window width. If False,
+          enable a horizontal scrollbar instead.
+  """
 
   from PySide6.QtWidgets import QApplication, QMainWindow, QTextEdit
   import sys

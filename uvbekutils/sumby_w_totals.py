@@ -14,8 +14,26 @@ Now with git, generic name that replaces those with version numbers.
 # format of INDEX_VARS_W_SUMFLAG is list of tuples: (variable name, whether to subtotal)
 # Order of variables is order/level of subtotaling
 
-def sumby_w_totals(df_in, index_vars_w_sumflag, summed_fields, agg_type):
-    """ pivot with sumtotals"""
+def sumby_w_totals(df_in: "pd.DataFrame", index_vars_w_sumflag: list, summed_fields: list, agg_type: str) -> "pd.DataFrame":
+    """Aggregate a DataFrame by multiple grouping variables with subtotals.
+
+    Groups df_in by combinations of variables in index_vars_w_sumflag,
+    computes aggregations for summed_fields, and inserts subtotal and grand
+    total rows (marked with '_TOTAL') into the sorted output DataFrame.
+
+    Args:
+        df_in: Input DataFrame containing the data to aggregate.
+        index_vars_w_sumflag: List of field names or (field, bool) tuples
+            defining grouping hierarchy. The bool controls whether subtotal
+            rows are generated for that field (True) or not (False). Plain
+            strings default to False.
+        summed_fields: Column names in df_in to aggregate.
+        agg_type: Aggregation function to apply (e.g. 'sum', 'mean').
+
+    Returns:
+        A DataFrame with detail rows and '_TOTAL' subtotal rows interleaved,
+        sorted by index. Grand total row uses '_TOTAL' for all index fields.
+    """
 
     import itertools
     import numpy as np
