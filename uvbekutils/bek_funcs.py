@@ -337,8 +337,8 @@ def exit_yes_no(msg: str, title: str | None = None, display_exiting: bool = Fals
     from uvbekutils import pyautobek
     from loguru import logger
 
-    choice = pyautobek.confirm(msg, title, buttons=['Yes', 'No'])
-    if choice == "no":
+    choice = pyautobek.confirm(msg, title, buttons=['Continue', 'Exit'])
+    if choice == "exit":
         if display_exiting:
             pyautobek.alert("Exiting", "Alert")
         logger.debug("here")
