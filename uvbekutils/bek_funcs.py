@@ -19,7 +19,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
+from loguru import Logger
 from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 # TODO what to do with loggers?
 
@@ -664,155 +667,155 @@ def check_ws_headers(ws: Worksheet, vals: list[tuple[str, str]]) -> None:
     for pairs in vals:
         chk_header_vals(ws, pairs[0], pairs[1])
 
-# TODO Add in check_fie+headers like above with csv
-
-def text_box(txt: str, title: str = '', box_title: str = '', buttons: list | None = None) -> str | None:
-    """Display a scrollable text block in a PySimpleGUI window with custom buttons.
-
-    Window size is auto-scaled to the text content, capped at 80 columns and
-    80 rows. A vertical scrollbar is added when the text exceeds 80 lines.
-
-    Args:
-        txt: Text to display, with lines separated by '\\n'.
-        title: Heading text rendered inside the window above the text area.
-        box_title: Title shown in the window title bar.
-        buttons: List of button label strings. Defaults to ['OK', 'Exit'].
-
-    Returns:
-        Lowercased label of the button clicked, or None if the window was
-        closed without a button press.
-    """
-
-    import PySimpleGUI as sg
-
-    # window = sg.Window('Virus Simulation', layout, background_color='hex_color_code')
-
-    if buttons is None:
-        buttons = ["OK", "Exit"]
-
-    col_factor = 3  # to scale window equally
-    row_factor = 30  # to scale window equally
-    max_cols = len(max(txt.split("\n"), key=len)) * col_factor
-    cols = max_cols
-    # v_scroll = False
-    col_limit = 80 * col_factor
-    col_min = 50 * col_factor
-    if cols > col_limit:
-        # v_scroll = True
-        cols = col_limit
-    elif cols < col_min:
-        cols = col_min
-
-    noscroll = True
-    row_limit = 80
-    row_min = 6
-    # max_rows = len(txt.split("\n"))
-    # rows = max_rows
-    rows = len(txt.split("\n"))
-    if rows > row_limit:
-        noscroll = False
-        rows = row_limit
-    elif rows < row_min:
-        rows = row_min
-    #horizontal_scroll=h_scroll,
-    # sg.theme('SystemDefault1')
-    sg.theme('Default1')
-    layout = [
-        [sg.Text(title, font=("Arial", 18))],
-        [sg.Multiline(txt, autoscroll=False, expand_x=True, no_scrollbar=noscroll,
-                      expand_y=True, enable_events=True)],
-        [sg.Button(text) for text in buttons],
-    ]
-
-    event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-                              use_custom_titlebar=True, size=(600, rows*row_factor), disable_close=True,
-                              resizable=True, grab_anywhere=True).read(close=True)
-    if event is not None:
-        event = event.lower()
-    return event
-
-
-def get_dir_name(box_title: str, title2: str, initial_dir: str | Path) -> Path:
-    """Show a folder-picker dialog and return the selected directory as a Path.
-
-    Exits via exit_yes if no directory is chosen.
-
-    Args:
-        box_title: Title shown in the window title bar.
-        title2: Heading text displayed inside the dialog.
-        initial_dir: Starting directory for the folder browser.
-
-    Returns:
-        Expanded Path of the chosen directory.
-    """
-
-    import os
-    import PySimpleGUI as sg
-    from pathlib import Path
-    from loguru import logger
-
-    logger.debug('in get_dir_name')
-
-    layout = [
-        [sg.Text(title2, font=("Arial", 18))],
-        [
-         sg.Input(key="-IN-", expand_x=True),
-         sg.FolderBrowse(initial_folder=Path(initial_dir).expanduser())
-         ],
-        [sg.Button("Choose")],
-    ]
-
-    # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
-    event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-                              size=(1000, 150), use_custom_titlebar=True).read(close=True)
-
-    dir_name = values['-IN-']
-    if dir_name == "":
-        exit_yes("No directory name chosen")
-
-    return Path(dir_name).expanduser()
-
-
-def get_file_name(box_title: str, title2: str, initial_dir: str | Path) -> Path:
-    """Show a file-picker dialog and return the selected file as a Path.
-
-    Exits via exit_yes if no file is chosen.
-
-    Args:
-        box_title: Title shown in the window title bar.
-        title2: Heading text displayed inside the dialog.
-        initial_dir: Starting directory for the file browser.
-
-    Returns:
-        Expanded Path of the chosen file.
-    """
-
-    import PySimpleGUI as sg
-    from pathlib import Path
-    from loguru import logger
-    from uvbekutils import exit_yes
-
-    logger.debug('in get_file_name')
-    # "Select Sincere address export file 'all-parent-campaign-requests-yyyy-mm-dd.csv'"
-    layout = [
-        [sg.Text(title2, font=("Arial", 18))],
-        [
-         sg.Input(key="-IN-", expand_x=True),
-         sg.FileBrowse(initial_folder=Path(initial_dir).expanduser())
-         ],
-        [sg.Button("Choose")],
-    ]
-
-    # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
-    event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-                              size=(1000, 200), use_custom_titlebar=True).read(close=True)
-    # sg.Window.close()
-
-    file_name = values['-IN-']
-    if file_name == "":
-        exit_yes("No file name chosen")
-
-    return Path(file_name).expanduser()
+# # TODO Add in check_fie+headers like above with csv
+#
+# # def text_box(txt: str, title: str = '', box_title: str = '', buttons: list | None = None) -> str | None:
+# #     """Display a scrollable text block in a PySimpleGUI window with custom buttons.
+# #
+# #     Window size is auto-scaled to the text content, capped at 80 columns and
+# #     80 rows. A vertical scrollbar is added when the text exceeds 80 lines.
+# #
+# #     Args:
+# #         txt: Text to display, with lines separated by '\\n'.
+# #         title: Heading text rendered inside the window above the text area.
+# #         box_title: Title shown in the window title bar.
+# #         buttons: List of button label strings. Defaults to ['OK', 'Exit'].
+# #
+# #     Returns:
+# #         Lowercased label of the button clicked, or None if the window was
+# #         closed without a button press.
+# #     """
+# #
+# #     import PySimpleGUI as sg
+# #
+# #     # window = sg.Window('Virus Simulation', layout, background_color='hex_color_code')
+# #
+# #     if buttons is None:
+# #         buttons = ["OK", "Exit"]
+# #
+# #     col_factor = 3  # to scale window equally
+# #     row_factor = 30  # to scale window equally
+# #     max_cols = len(max(txt.split("\n"), key=len)) * col_factor
+# #     cols = max_cols
+# #     # v_scroll = False
+# #     col_limit = 80 * col_factor
+# #     col_min = 50 * col_factor
+# #     if cols > col_limit:
+# #         # v_scroll = True
+# #         cols = col_limit
+# #     elif cols < col_min:
+# #         cols = col_min
+# #
+# #     noscroll = True
+# #     row_limit = 80
+# #     row_min = 6
+# #     # max_rows = len(txt.split("\n"))
+# #     # rows = max_rows
+# #     rows = len(txt.split("\n"))
+# #     if rows > row_limit:
+# #         noscroll = False
+# #         rows = row_limit
+# #     elif rows < row_min:
+# #         rows = row_min
+# #     #horizontal_scroll=h_scroll,
+# #     # sg.theme('SystemDefault1')
+# #     sg.theme('Default1')
+# #     layout = [
+# #         [sg.Text(title, font=("Arial", 18))],
+# #         [sg.Multiline(txt, autoscroll=False, expand_x=True, no_scrollbar=noscroll,
+# #                       expand_y=True, enable_events=True)],
+# #         [sg.Button(text) for text in buttons],
+# #     ]
+# #
+# #     event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
+# #                               use_custom_titlebar=True, size=(600, rows*row_factor), disable_close=True,
+# #                               resizable=True, grab_anywhere=True).read(close=True)
+# #     if event is not None:
+# #         event = event.lower()
+# #     return event
+#
+#
+# # def get_dir_name(box_title: str, title2: str, initial_dir: str | Path) -> Path:
+# #     """Show a folder-picker dialog and return the selected directory as a Path.
+# #
+# #     Exits via exit_yes if no directory is chosen.
+# #
+# #     Args:
+# #         box_title: Title shown in the window title bar.
+# #         title2: Heading text displayed inside the dialog.
+# #         initial_dir: Starting directory for the folder browser.
+# #
+# #     Returns:
+# #         Expanded Path of the chosen directory.
+# #     """
+# #
+# #     import os
+# #     import PySimpleGUI as sg
+# #     from pathlib import Path
+# #     from loguru import logger
+# #
+# #     logger.debug('in get_dir_name')
+# #
+# #     layout = [
+# #         [sg.Text(title2, font=("Arial", 18))],
+# #         [
+# #          sg.Input(key="-IN-", expand_x=True),
+# #          sg.FolderBrowse(initial_folder=Path(initial_dir).expanduser())
+# #          ],
+# #         [sg.Button("Choose")],
+# #     ]
+# #
+# #     # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
+# #     event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
+# #                               size=(1000, 150), use_custom_titlebar=True).read(close=True)
+# #
+# #     dir_name = values['-IN-']
+# #     if dir_name == "":
+# #         exit_yes("No directory name chosen")
+# #
+# #     return Path(dir_name).expanduser()
+#
+#
+# def get_file_name(box_title: str, title2: str, initial_dir: str | Path) -> Path:
+#     """Show a file-picker dialog and return the selected file as a Path.
+#
+#     Exits via exit_yes if no file is chosen.
+#
+#     Args:
+#         box_title: Title shown in the window title bar.
+#         title2: Heading text displayed inside the dialog.
+#         initial_dir: Starting directory for the file browser.
+#
+#     Returns:
+#         Expanded Path of the chosen file.
+#     """
+#
+#     import PySimpleGUI as sg
+#     from pathlib import Path
+#     from loguru import logger
+#     from uvbekutils import exit_yes
+#
+#     logger.debug('in get_file_name')
+#     # "Select Sincere address export file 'all-parent-campaign-requests-yyyy-mm-dd.csv'"
+#     layout = [
+#         [sg.Text(title2, font=("Arial", 18))],
+#         [
+#          sg.Input(key="-IN-", expand_x=True),
+#          sg.FileBrowse(initial_folder=Path(initial_dir).expanduser())
+#          ],
+#         [sg.Button("Choose")],
+#     ]
+#
+#     # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
+#     event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
+#                               size=(1000, 200), use_custom_titlebar=True).read(close=True)
+#     # sg.Window.close()
+#
+#     file_name = values['-IN-']
+#     if file_name == "":
+#         exit_yes("No file name chosen")
+#
+#     return Path(file_name).expanduser()
 
 
 def convert_bool(bool_val: bool | str | None) -> bool:
