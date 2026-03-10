@@ -9,7 +9,7 @@ from .bek_funcs import scroll_box
 from .bek_funcs import is_number
 from .bek_funcs import exit_yes
 from .bek_funcs import clean_field
-from .bek_funcs import get_file_name
+# from .bek_funcs import get_file_name
 from .bek_funcs import autosize_xls_cols
 from .bek_funcs import load_workbook_w_filepath
 from .bek_funcs import wb_path
@@ -24,12 +24,12 @@ from .bek_funcs import calling_func
 from .bek_funcs import find_header_row_in_file
 from .bek_funcs import read_file_to_df
 from .bek_funcs import check_ws_headers
-from .bek_funcs import text_box
-from .bek_funcs import get_dir_name
+# from .bek_funcs import text_box
+# from .bek_funcs import get_dir_name
 from .bek_funcs import convert_bool
 from .bek_funcs import exe_file
 from .bek_funcs import exe_path
-from .bek_funcs import text_box
+# from .bek_funcs import text_box
 from .bek_funcs import bek_write_excel
 from .bek_funcs import bek_excel_titles
 from .bek_funcs import conc_addr
