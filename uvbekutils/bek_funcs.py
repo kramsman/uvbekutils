@@ -20,7 +20,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-from loguru import Logger
+from loguru import logger
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -259,8 +259,8 @@ def setup_loguru(
     log_path: Path | None = None,
     log_mode: str = 'w',
     log_file: bool = True,
-) -> Logger:
-    """Configure and return a loguru Logger with stdout and optional file sinks.
+) -> logger:
+    """Configure and return a loguru logger with stdout and optional file sinks.
 
     Log file is placed in the same directory as the running executable. Any
     existing log file is removed before a new one is opened.
@@ -273,7 +273,7 @@ def setup_loguru(
         log_file: If True, create a log file sink in addition to stdout.
 
     Returns:
-        The configured loguru Logger instance.
+        The configured loguru logger instance.
     """
 
     # TODO suppress error if log not found which happens on first run
