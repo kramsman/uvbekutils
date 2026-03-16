@@ -8,6 +8,7 @@ Functions:
     alert: Display an alert dialog with an Ok button.
     alert_with_file_link: Display an alert dialog with an Ok button and a clickable file link.
     confirm: Display a confirmation dialog with custom buttons.
+    confirm_with_file_link: Display a confirmation dialog with custom buttons and a clickable file link.
 
 Example::
 
@@ -123,6 +124,73 @@ def alert_with_file_link(msg, filepath, title="Alert"):
 
     dialog.setLayout(layout)
     dialog.exec()
+
+
+def confirm_with_file_link(msg, filepath, title="Confirm", buttons=None):
+    """Display a confirmation dialog with a message, a clickable file link, and custom buttons.
+
+    Like ``confirm()``, but adds a clickable hyperlink below the message that
+    opens ``filepath`` in its default application.
+
+    Args:
+        msg (str): The message to display in the dialog.
+        filepath (str | Path): Path to a file; displayed as a clickable link.
+        title (str): The title of the dialog window. Defaults to "Confirm".
+        buttons (list[str] | None): Button labels. Defaults to ["Ok", "Cancel"].
+
+    Returns:
+        str: The lowercase text of the clicked button.
+
+    Example::
+
+        choice = confirm_with_file_link("Errors found. Upload anyway?", "/output/error.pdf",
+                                        "Confirm Upload", ["Yes", "No"])
+        if choice == "yes":
+            upload()
+    """
+    if buttons is None:
+        buttons = ["Ok", "Cancel"]
+
+    app = _get_app()
+
+    dialog = QDialog()
+    dialog.setWindowTitle(title)
+    dialog.setWindowFlags(dialog.windowFlags() | Qt.WindowStaysOnTopHint)
+
+    result = [None]
+
+    layout = QVBoxLayout()
+
+    label = QLabel(msg)
+    label.setWordWrap(True)
+    layout.addWidget(label)
+
+    link_label = QLabel(f'<a href="{filepath}">{filepath}</a>')
+    link_label.setOpenExternalLinks(False)
+    link_label.linkActivated.connect(lambda url: subprocess.run(['open', url]))
+    layout.addWidget(link_label)
+
+    button_layout = QHBoxLayout()
+    button_layout.addStretch()
+
+    def make_handler(button_text):
+        def handler():
+            result[0] = button_text
+            dialog.accept()
+        return handler
+
+    for button_text in buttons:
+        btn = QPushButton(button_text)
+        btn.clicked.connect(make_handler(button_text))
+        button_layout.addWidget(btn)
+
+    button_layout.addStretch()
+    layout.addLayout(button_layout)
+
+    dialog.setLayout(layout)
+    dialog.exec()
+
+    return result[0].lower()
 
 
 def confirm(msg, title="Confirm", buttons=None):
