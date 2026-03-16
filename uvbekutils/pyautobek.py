@@ -6,6 +6,7 @@ are displayed as always-on-top windows with word-wrapped messages.
 
 Functions:
     alert: Display an alert dialog with an Ok button.
+    alert_with_file_link: Display an alert dialog with an Ok button and a clickable file link.
     confirm: Display a confirmation dialog with custom buttons.
 
 Example::
@@ -16,6 +17,7 @@ Example::
     choice = confirm("Save changes?", "Confirm", ["Yes", "No"])
 """
 
+import subprocess
 import sys
 from PySide6.QtWidgets import (
     QApplication,
@@ -62,6 +64,52 @@ def alert(msg, title="Alert"):
     label = QLabel(msg)
     label.setWordWrap(True)
     layout.addWidget(label)
+
+    button_layout = QHBoxLayout()
+    button_layout.addStretch()
+
+    ok_button = QPushButton("Ok")
+    ok_button.clicked.connect(dialog.accept)
+    button_layout.addWidget(ok_button)
+
+    button_layout.addStretch()
+    layout.addLayout(button_layout)
+
+    dialog.setLayout(layout)
+    dialog.exec()
+
+
+def alert_with_file_link(msg, filepath, title="Alert"):
+    """Display an alert dialog with a message, a clickable file link, and an Ok button.
+
+    Like ``alert()``, but adds a clickable hyperlink below the message that
+    opens ``filepath`` in its default application (e.g. Preview for PDF).
+
+    Args:
+        msg (str): The message to display in the dialog.
+        filepath (str | Path): Path to a file; displayed as a clickable link.
+        title (str): The title of the dialog window. Defaults to "Alert".
+
+    Example::
+
+        alert_with_file_link("Errors found.", "/output/error.pdf", "Error")
+    """
+    app = _get_app()
+
+    dialog = QDialog()
+    dialog.setWindowTitle(title)
+    dialog.setWindowFlags(dialog.windowFlags() | Qt.WindowStaysOnTopHint)
+
+    layout = QVBoxLayout()
+
+    label = QLabel(msg)
+    label.setWordWrap(True)
+    layout.addWidget(label)
+
+    link_label = QLabel(f'<a href="{filepath}">{filepath}</a>')
+    link_label.setOpenExternalLinks(False)
+    link_label.linkActivated.connect(lambda url: subprocess.run(['open', url]))
+    layout.addWidget(link_label)
 
     button_layout = QHBoxLayout()
     button_layout.addStretch()
