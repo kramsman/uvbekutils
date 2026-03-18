@@ -38,3 +38,5 @@ from .bek_funcs import conc_addr_remove_desc
 from .sumby_w_totals import sumby_w_totals
 from .select_from_list import select_from_list
 # from .test_foreign_git_edit import test_foreign_git_edit
+from .standardize_columns import ColSpec
+from .standardize_columns import standardize_columns
