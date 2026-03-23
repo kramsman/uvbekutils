@@ -238,7 +238,7 @@ def confirm(msg, title="Confirm", buttons=None):
     scroll.setWidget(label)
     scroll.setWidgetResizable(True)
     scroll.setMinimumWidth(500)
-    scroll.setMaximumHeight(600)
+    scroll.setMaximumHeight(700)
     layout.addWidget(scroll)
 
     button_layout = QHBoxLayout()
