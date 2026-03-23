@@ -27,6 +27,8 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QScrollArea,
+    QWidget,
 )
 
 from PySide6.QtCore import Qt
@@ -230,7 +232,14 @@ def confirm(msg, title="Confirm", buttons=None):
 
     label = QLabel(msg)
     label.setWordWrap(True)
-    layout.addWidget(label)
+    label.setContentsMargins(4, 4, 4, 4)
+
+    scroll = QScrollArea()
+    scroll.setWidget(label)
+    scroll.setWidgetResizable(True)
+    scroll.setMinimumWidth(500)
+    scroll.setMaximumHeight(600)
+    layout.addWidget(scroll)
 
     button_layout = QHBoxLayout()
     button_layout.addStretch()
