@@ -128,7 +128,7 @@ def alert_with_file_link(msg, filepath, title="Alert"):
     dialog.exec()
 
 
-def confirm_with_file_link(msg, filepath, title="Confirm", buttons=None):
+def confirm_with_file_link(msg, filepath, title="Confirm", buttons=None, close_on_link_click=False):
     """Display a confirmation dialog with a message, a clickable file link, and custom buttons.
 
     Like ``confirm()``, but adds a clickable hyperlink below the message that
@@ -139,9 +139,16 @@ def confirm_with_file_link(msg, filepath, title="Confirm", buttons=None):
         filepath (str | Path): Path to a file; displayed as a clickable link.
         title (str): The title of the dialog window. Defaults to "Confirm".
         buttons (list[str] | None): Button labels. Defaults to ["Ok", "Cancel"].
+        close_on_link_click (bool): When True, clicking the link both opens
+            the file/URL **and** closes the dialog. Use this for end-user
+            scripts where the dialog is just a launcher and would otherwise
+            be left buried behind the opened browser/app. Defaults to False
+            (preserves existing behavior — popup stays open after click).
 
     Returns:
-        str: The lowercase text of the clicked button.
+        str: The lowercase text of the clicked button. If
+        ``close_on_link_click=True`` and the user dismissed the dialog by
+        clicking the link, returns ``""``.
 
     Example::
 
@@ -169,7 +176,12 @@ def confirm_with_file_link(msg, filepath, title="Confirm", buttons=None):
 
     link_label = QLabel(f'<a href="{filepath}">{filepath}</a>')
     link_label.setOpenExternalLinks(False)
-    link_label.linkActivated.connect(lambda url: subprocess.run(['open', url]))
+    if close_on_link_click:
+        link_label.linkActivated.connect(
+            lambda url: (subprocess.run(['open', url]), dialog.accept())
+        )
+    else:
+        link_label.linkActivated.connect(lambda url: subprocess.run(['open', url]))
     layout.addWidget(link_label)
 
     button_layout = QHBoxLayout()
@@ -192,7 +204,7 @@ def confirm_with_file_link(msg, filepath, title="Confirm", buttons=None):
     dialog.setLayout(layout)
     dialog.exec()
 
-    return result[0].lower()
+    return result[0].lower() if result[0] is not None else ""
 
 
 def confirm(msg, title="Confirm", buttons=None):
