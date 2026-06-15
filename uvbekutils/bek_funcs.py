@@ -304,17 +304,13 @@ def setup_loguru(
         #     log_path = None
     logger.debug(f"({log_path=}")
 
+    logger.trace("removing existing sinks (including any from a prior setup_loguru call)")
+    logger.remove()
+
     logger.trace("setting sys.stdout")
     logger.add(sys.stdout, level=log_level_std, backtrace=True, diagnose=False)
 
     if log_file:
-        logger.trace("setting log_file info - logger.remove(0) next")
-
-        try:
-            logger.remove(0)
-        except ValueError:
-            pass
-
         logfile = exe_file().with_suffix(".log")
         try:
             os.remove(logfile)
