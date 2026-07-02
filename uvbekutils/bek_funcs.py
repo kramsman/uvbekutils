@@ -915,7 +915,8 @@ def conc_addr_remove_desc(concentration_dict: dict, state: str | None = None, ci
     return desc
 
 
-def scroll_box(txt: str, *, title: str | None = None, wrap_lines: bool = True) -> None:
+def scroll_box(txt: str, *, title: str | None = None, wrap_lines: bool = True,
+               width: int = 600, height: int = 400) -> None:
   """Display a read-only scrollable text box using a PySide6 Qt window.
 
   Reuses an existing QApplication if one is already running, otherwise
@@ -926,6 +927,8 @@ def scroll_box(txt: str, *, title: str | None = None, wrap_lines: bool = True) -
       title: Window title bar text.
       wrap_lines: If True, wrap long lines to the window width. If False,
           enable a horizontal scrollbar instead.
+      width: Initial window width in pixels. Defaults to 600.
+      height: Initial window height in pixels. Defaults to 400.
   """
 
   from PySide6.QtWidgets import QApplication, QMainWindow, QTextEdit
@@ -955,7 +958,7 @@ def scroll_box(txt: str, *, title: str | None = None, wrap_lines: bool = True) -
 
   # Set text edit as the central widget
   window.setCentralWidget(text_edit)
-  window.resize(600, 400)
+  window.resize(width, height)
   window.show()
 
   if app_created:
