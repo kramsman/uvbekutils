@@ -273,7 +273,9 @@ def confirm(msg, title="Confirm", buttons=None):
     dialog.setLayout(layout)
     dialog.exec()
 
-    return result[0].lower()
+    # result[0] stays None when the dialog is closed with the window button
+    # instead of a choice. Matches the guard in confirm_with_file_link above.
+    return result[0].lower() if result[0] is not None else ""
 
 
 if __name__ == "__main__":
