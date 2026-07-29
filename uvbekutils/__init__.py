@@ -1,42 +1,74 @@
-"""  init.py """
+"""uvbekutils — helpers, resolved lazily.
 
-from .list_pick import list_pick
-from .pyautobek import alert
-from .pyautobek import confirm
-from .select_file import select_file
-from .bek_funcs import safe_str
-from .bek_funcs import scroll_box
-from .bek_funcs import is_number
-from .bek_funcs import exit_yes
-from .bek_funcs import clean_field
-# from .bek_funcs import get_file_name
-from .bek_funcs import autosize_xls_cols
-from .bek_funcs import load_workbook_w_filepath
-from .bek_funcs import wb_path
-from .bek_funcs import wb_name
-from .bek_funcs import setup_loguru
-from .bek_funcs import exit_yes_no
-from .bek_funcs import clean_field
-from .bek_funcs import bad_file_exit
-from .bek_funcs import bad_path_exit
-from .bek_funcs import bad_path_create
-from .bek_funcs import calling_func
-from .bek_funcs import find_header_row_in_file
-from .bek_funcs import read_file_to_df
-from .bek_funcs import check_ws_headers
-# from .bek_funcs import text_box
-# from .bek_funcs import get_dir_name
-from .bek_funcs import convert_bool
-from .bek_funcs import exe_file
-from .bek_funcs import exe_path
-# from .bek_funcs import text_box
-from .bek_funcs import bek_write_excel
-from .bek_funcs import bek_excel_titles
-from .bek_funcs import conc_addr
-from .bek_funcs import conc_addr_desc
-from .bek_funcs import conc_addr_remove_desc
-from .sumby_w_totals import sumby_w_totals
-from .select_from_list import select_from_list
-# from .test_foreign_git_edit import test_foreign_git_edit
-from .standardize_columns import ColSpec
-from .standardize_columns import standardize_columns
+Names are looked up on first use rather than imported here, because Python runs
+this file whenever *anything* in the package is touched. Importing eagerly meant
+`from uvbekutils.bek_funcs import safe_str` also pulled in `pyautobek`, and with
+it PySide6 — which turns a plain terminal script into a macOS GUI app that takes
+a dock icon and steals keyboard focus from its own prompts.
+
+Only pyautobek and select_file need Qt; every other submodule is Qt-free. Loading
+lazily means Qt arrives only when a dialog is actually used.
+
+Usage is unchanged:
+
+    from uvbekutils import confirm, safe_str      # still works
+    from uvbekutils.pyautobek import alert        # still works
+"""
+
+import importlib
+
+# public name -> submodule that defines it
+_LAZY = {
+    # these two import PySide6, so they load Qt when first touched
+    "alert":                    "pyautobek",
+    "confirm":                  "pyautobek",
+    "select_file":              "select_file",
+
+    "list_pick":                "list_pick",
+    "sumby_w_totals":           "sumby_w_totals",
+    "select_from_list":         "select_from_list",
+    "ColSpec":                  "standardize_columns",
+    "standardize_columns":      "standardize_columns",
+
+    "safe_str":                 "bek_funcs",
+    "scroll_box":               "bek_funcs",
+    "is_number":                "bek_funcs",
+    "exit_yes":                 "bek_funcs",
+    "exit_yes_no":              "bek_funcs",
+    "clean_field":              "bek_funcs",
+    "autosize_xls_cols":        "bek_funcs",
+    "load_workbook_w_filepath": "bek_funcs",
+    "wb_path":                  "bek_funcs",
+    "wb_name":                  "bek_funcs",
+    "setup_loguru":             "bek_funcs",
+    "bad_file_exit":            "bek_funcs",
+    "bad_path_exit":            "bek_funcs",
+    "bad_path_create":          "bek_funcs",
+    "calling_func":             "bek_funcs",
+    "find_header_row_in_file":  "bek_funcs",
+    "read_file_to_df":          "bek_funcs",
+    "check_ws_headers":         "bek_funcs",
+    "convert_bool":             "bek_funcs",
+    "exe_file":                 "bek_funcs",
+    "exe_path":                 "bek_funcs",
+    "bek_write_excel":          "bek_funcs",
+    "bek_excel_titles":         "bek_funcs",
+    "conc_addr":                "bek_funcs",
+    "conc_addr_desc":           "bek_funcs",
+    "conc_addr_remove_desc":    "bek_funcs",
+}
+
+__all__ = sorted(_LAZY)
+
+
+def __getattr__(name):
+    """PEP 562 — resolve a public name to its submodule on first access."""
+    if name in _LAZY:
+        value = getattr(importlib.import_module(f".{_LAZY[name]}", __name__), name)
+        globals()[name] = value          # cache so this runs once per name
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return __all__
